@@ -38,7 +38,7 @@ d3.json("sankey-formatted.json", function(error, graph) {
     .enter().append("path")
       .attr("class", "link")
       .attr("d", path)
-      .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+      .style("stroke-width", 3)
       .sort(function(a, b) { return b.dy - a.dy; });
 
 // add the link titles
