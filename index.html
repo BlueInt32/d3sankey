@@ -5,11 +5,14 @@
     <link href="style.css" rel="stylesheet">
   </head>
   <body>
-    <div id="chart"></div>
+    <div id="vis"></div>
     
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <!--<script src="https://cdn.rawgit.com/Neilos/bihisankey/master/bihisankey.js"></script>-->
     <script src="sankey.js"></script>
+    <script src="data.js"></script>
     <script src="app.js"></script>
+    <input type="button" onclick="addNode();" value="Add" />
+    <input type="button" onclick="relayout();" value="Relayout" />
   </body>
 </html>
