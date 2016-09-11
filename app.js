@@ -1,8 +1,24 @@
 var units = "Widgets";
 
-var margin = { top: 10, right: 10, bottom: 10, left: 10 },
-  width = 1200 - margin.left - margin.right,
-  height = 600 - margin.top - margin.bottom;
+var CONTAINER_WIDTH = 1200,
+  CONTAINER_HEIGHT = 600,
+  BOX_HEIGHT = 40
+BOX_BORDER_RADIUS = BOX_HEIGHT / 2,
+  BOX_TEXT_MARGIN_LEFT = 10,
+  BOX_SUBTEXT_MARGIN_LEFT = 13,
+  NODE_WIDTH = 150,
+  NODE_PADDING = 0,
+  EXPANDER_RADIUS = 20,
+  SHOW_DEBUG_BOX = false;
+
+var MARGINS = {
+    TOP: 0,
+    RIGHT: 0,
+    BOTTOM: 0,
+    LEFT: 0
+  },
+  width = CONTAINER_WIDTH - MARGINS.LEFT - MARGINS.RIGHT,
+  height = CONTAINER_HEIGHT - MARGINS.TOP - MARGINS.BOTTOM;
 
 var formatNumber = d3.format(",.0f"), // zero decimal places
   format = function(d) {
@@ -12,31 +28,23 @@ var formatNumber = d3.format(",.0f"), // zero decimal places
 
 // append the svg canvas to the page
 var svg = d3.select("#vis").append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
+  .attr("width", width + MARGINS.LEFT + MARGINS.RIGHT)
+  .attr("height", height + MARGINS.TOP + MARGINS.BOTTOM)
   .append("g")
   .attr("transform",
-    "translate(" + margin.left + "," + margin.top + ")");
+    "translate(" + MARGINS.LEFT + "," + MARGINS.TOP + ")");
 var sankey = {};
 var path = {};
+
 // Set the sankey diagram properties
 function resetSankey() {
   svg.selectAll("svg *").remove();
   sankey = d3sankey()
-  .nodeWidth(150)
-  .nodePadding(25)
-  .size([width, height]);
+    .nodeWidth(NODE_WIDTH)
+    .nodePadding(NODE_PADDING)
+    .size([width, height]);
 
-  path = d3.svg.diagonal()
-    .source(function(d) {
-      return { "x": d.source.y + d.source.dy / 2, "y": d.source.x + sankey.nodeWidth() / 2 };
-    })
-    .target(function(d) {
-      return { "x": d.target.y + d.target.dy / 2, "y": d.target.x + sankey.nodeWidth() / 2 };
-    })
-    .projection(function(d) {
-      return [d.y, d.x];
-    });
+
 }
 
 function relayout() {
@@ -48,54 +56,79 @@ function relayout() {
 var graph = getData(0);
 resetSankey();
 draw();
+
 function addNode() {
   console.log('adding node');
-  var nodeDef = {"node":graph.nodes.length,"name":"node" + (graph.nodes.length + 1)};
-  var linkDef = {"source":nodeDef.node - 1,"target":nodeDef.node,"value":10};
+  var nodeDef = {
+    "node": graph.nodes.length,
+    "name": "node" + (graph.nodes.length + 1)
+  };
+  var linkDef = {
+    "source": nodeDef.node - 1,
+    "target": nodeDef.node,
+    "value": 10
+  };
   graph.nodes.push(nodeDef);
   graph.links.push(linkDef);
   resetSankey();
   draw();
-
 }
+
 function draw() {
-  
+
   sankey.nodes(graph.nodes)
     .links(graph.links)
     .layout(1);
-  // add in the links
+
+
+  //  ╦  ┬┌┐┌┬┌─┌─┐
+  //  ║  ││││├┴┐└─┐
+  //  ╩═╝┴┘└┘┴ ┴└─┘
+  path = d3.svg.diagonal()
+    .source(function(d) {
+      var xOffset = d.source.type === '_expander' ? EXPANDER_RADIUS + NODE_WIDTH / 2 : NODE_WIDTH;
+      return {
+        "x": d.source.y + d.source.dy / 2,
+        "y": d.source.x + xOffset - 3 
+      };
+    })
+    .target(function(d) {
+      var xOffset = d.target.type === '_expander' ? NODE_WIDTH / 2 - EXPANDER_RADIUS  : 0;
+      return { 
+        "x": d.target.y + d.target.dy / 2,
+        "y": d.target.x + xOffset + 3 /* + sankey.nodeWidth() / 2*/
+      };
+    })
+    .projection(function(d) {
+      return [d.y, d.x];
+    });
   var link = svg.append("g").selectAll(".link")
     .data(graph.links)
     .enter().append("path")
     .attr("class", "link")
     .attr("d", path)
-    .on("mouseover", function() {
-        d3.select(this).style("stroke-opacity", ".5")
-      })
-      .on("mouseout", function() {
-        d3.select(this).style("stroke-opacity", ".2")
-      })
-      .style("stroke-width", function(d) {
-        return Math.max(1, Math.sqrt(d.dy));
-      })
-      .sort(function(a, b) {
-        return b.dy - a.dy;
-      });
-    //.stylizeLinkDynamic();
-
-  // add the link titles
+    .style("stroke-width", function(d) {
+      return Math.max(1, Math.sqrt(d.dy));
+    })
+    // .sort(function(a, b) {
+    //   return b.dy - a.dy;
+    // })
+  ;
   link.append("title")
     .text(function(d) {
       return d.source.name + " → " + d.target.name + "\n" + format(d.value);
-    })
-    ;
+    });
 
-  // add in the nodes
+
+  //  ╔╗╔┌─┐┌┬┐┌─┐┌─┐ 
+  //  ║║║│ │ ││├┤ └─┐
+  //  ╝╚╝└─┘─┴┘└─┘└─┘
   var node = svg.append("g").selectAll(".node")
     .data(graph.nodes)
     .enter().append("g")
     .attr("class", "node")
     .attr("transform", function(d) {
+      console.log(d.name, d.x, d.y);
       return "translate(" + d.x + "," + d.y + ")";
     })
     .call(d3.behavior.drag()
@@ -107,96 +140,110 @@ function draw() {
       })
       .on("drag", dragmove));
 
-  // add the circles for "node4" and "node7"
+
+  if (SHOW_DEBUG_BOX) {
+    node
+      .append("rect")
+      .style("fill", "none")
+      .style("stroke-width", 1)
+      .style("stroke", "#F00")
+      .attr("width", sankey.nodeWidth())
+      .attr("height", function(d) {
+        return d.dy;
+      });
+  }
+
+  //  ╔═╗┬─┐┌─┐┌┬┐┬ ┬┌─┐┌┬┐
+  //  ╠═╝├┬┘│ │ │││ ││   │ 
+  //  ╩  ┴└─└─┘─┴┘└─┘└─┘ ┴ 
+
   node
     .filter(function(d) {
-      return (d.name == "node4") || (d.name == "node7");
+      return (d.type !== "_expander");
+    })
+    .append("rect")
+    .attr("y", function(d) {
+      return d.dy / 2 - BOX_HEIGHT / 2;
+    })
+    .attr("height", BOX_HEIGHT)
+    .attr("rx", BOX_BORDER_RADIUS)
+    .attr("ry", BOX_BORDER_RADIUS)
+    .attr("width", sankey.nodeWidth())
+    //.style("stroke-width", 3)
+    .append("title")
+    .text(function(d) {
+      return d.name + "\n" + format(d.value);
+    });
+
+  node
+    .filter(function(d) {
+      return (d.type !== "_expander");
+    })
+    .append("svg:image")
+    .attr("xlink:href",  'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/32/519791-101_Warning-128.png')
+    .attr("transform", function(d) {
+      return "translate(" + (NODE_WIDTH - 32 - 3) + "," + (d.dy / 2 - BOX_HEIGHT / 2 + 3) +")";
+    })
+    .attr("height", 32)
+    .attr("width",32);
+
+
+  //  ╔═╗─┐ ┬┌─┐┌─┐┌┐┌┌┬┐┌─┐┬─┐ 
+  //  ║╣ ┌┴┬┘├─┘├─┤│││ ││├┤ ├┬┘
+  //  ╚═╝┴ └─┴  ┴ ┴┘└┘─┴┘└─┘┴└─
+  node
+    .filter(function(d) {
+      return (d.type === "_expander");
     })
     .append("circle")
     .attr("cx", sankey.nodeWidth() / 2)
     .attr("cy", function(d) {
       return d.dy / 2;
     })
-    .attr("r", function(d) {
-      return Math.sqrt(d.dy);
-    })
-    .style("fill", function(d) {
-      return d.color = color(d.name.replace(/ .*/, ""));
-    })
-    .style("fill-opacity", ".9")
-    //.style("shape-rendering", "crispEdges")
-    .style("stroke", function(d) {
-      return d3.rgb(d.color).darker(2);
-    })
+    .attr("r", EXPANDER_RADIUS)
     .append("title")
     .text(function(d) {
       return d.name + "\n" + format(d.value);
     });
 
-  // add the rectangles for the rest of the nodes
+
+  //  ╔╦╗┌─┐─┐ ┬┌┬┐
+  //   ║ ├┤ ┌┴┬┘ │ 
+  //   ╩ └─┘┴ └─ ┴ 
   node
     .filter(function(d) {
-      return !((d.name == "node4") || (d.name == "node7"));
+      return d.type !== '_expander';
     })
-    .append("rect")
-    .attr("y", function(d) {
-      return d.dy / 2 - 10 - Math.sqrt(d.dy) / 2;
-    })
-    .attr("rx", 15)
-    .attr("ry", 15)
-    .attr("height", 40)
-    .attr("width", sankey.nodeWidth())
-    .style("fill", function(d) {
-      return d.color = color(d.name.replace(/ .*/, ""));
-    })
-    //.style("shape-rendering", "crispEdges")
-    .style("stroke-width", 4)
-    .style("stroke", function(d) {
-      return d3.rgb(d.color).darker(2);
-    })
-    .append("title")
-    .text(function(d) {
-      return d.name + "\n" + format(d.value);
-    });
-
-  // add in the title for the nodes
-  node.append("text")
-    .attr("x", function(d) {
-      if ((d.name == "node4") || (d.name == "node7"))
-        return -6 + sankey.nodeWidth() / 2 - Math.sqrt(d.dy);
-      else
-        return -16 + sankey.nodeWidth() / 2;
-    })
+    .append("text")
+    .attr('class', 'title')
     .attr("y", function(d) {
       return d.dy / 2;
     })
-    .attr("dy", ".35em")
-    //.attr("text-anchor", "end")
-    //.attr("text-shadow", "0 1px 0 #fff")
-    .attr("transform", null)
+    .attr("x", BOX_TEXT_MARGIN_LEFT)
     .text(function(d) {
       return d.name;
     })
+    .attr("text-anchor", "start");
+  node
     .filter(function(d) {
-      return d.x < width / 2;
+      return d.type !== '_expander';
     })
-    .attr("x", function(d) {
-      if ((d.name == "node4") || (d.name == "node7"))
-        return 6 + sankey.nodeWidth() / 2 + Math.sqrt(d.dy);
-      else
-        return 16 + sankey.nodeWidth() / 2;
+    .append("text")
+    .attr('class', 'owner')
+    .attr("y", function(d) {
+      return d.dy / 2;
+    })
+    .attr("dy", "1em")
+    .attr("dx", ".2em")
+    .attr("x", BOX_SUBTEXT_MARGIN_LEFT)
+    .text(function(d) {
+      return d.owner;
     })
     .attr("text-anchor", "start");
 
-    
+
   // the function for moving the nodes
   function dragmove(d) {
-    console.log('height - d.dy');
-    console.log(height + ' - ' + d.dy)
-    console.log(height - d.dy, d3.event.y);
-    // console.log("translate(" + (
-    //     d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + "," + (
-    //     d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")")
     d3.select(this).attr("transform",
       "translate(" + (
         d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + "," + (

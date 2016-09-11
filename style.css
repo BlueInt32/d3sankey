@@ -1,19 +1,36 @@
+#vis svg {
+  border: 1px dashed #777;
+}
+
 .node rect {
   cursor: move;
   fill-opacity: 1;
-  fill: 'white';
-  /*shape-rendering: crispEdges;/
+  fill: #FFF;
+  stroke: #BBB;
+  stroke-width: 3;
 }
 
 .node circle {
+  fill: #FFF;
   cursor: move;
   fill-opacity: 1;
-  shape-rendering: crispEdges;
+  stroke: #BBB;
+  stroke-width: 3;
 }
 
-.node text {
-  font-family: sans-serif;
+.node text.title {
+  font-family: Calibri;
+  font-weight: bold;
   pointer-events: none;
+  fill: #777;
+  /*text-shadow: 0 1px 0 #fff;*/
+}
+
+.node text.owner {
+  font-family: Calibri;
+  font-size: .8em;
+  pointer-events: none;
+  fill: #777;
   /*text-shadow: 0 1px 0 #fff;*/
 }
 .link {
