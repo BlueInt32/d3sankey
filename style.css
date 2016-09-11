@@ -1,8 +1,16 @@
 .node rect {
   cursor: move;
-  fill-opacity: .9;
+  fill-opacity: 1;
+  fill: 'white';
+  /*shape-rendering: crispEdges;/
+}
+
+.node circle {
+  cursor: move;
+  fill-opacity: 1;
   shape-rendering: crispEdges;
 }
+
 .node text {
   font-family: sans-serif;
   pointer-events: none;
@@ -11,7 +19,7 @@
 .link {
   fill: none;
   stroke: #000;
-  stroke-opacity: .2;
+  stroke-opacity: .33;
 }
 .link:hover {
   stroke-opacity: .5;

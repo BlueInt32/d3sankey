@@ -1,7 +1,7 @@
 var units = "Widgets";
 
 var margin = { top: 10, right: 10, bottom: 10, left: 10 },
-  width = 800 - margin.left - margin.right,
+  width = 1200 - margin.left - margin.right,
   height = 600 - margin.top - margin.bottom;
 
 var formatNumber = d3.format(",.0f"), // zero decimal places
@@ -21,8 +21,9 @@ var sankey = {};
 var path = {};
 // Set the sankey diagram properties
 function resetSankey() {
+  svg.selectAll("svg *").remove();
   sankey = d3sankey()
-  .nodeWidth(20)
+  .nodeWidth(150)
   .nodePadding(25)
   .size([width, height]);
 
@@ -58,37 +59,36 @@ function addNode() {
 
 }
 function draw() {
+  
   sankey.nodes(graph.nodes)
     .links(graph.links)
     .layout(1);
-
   // add in the links
   var link = svg.append("g").selectAll(".link")
     .data(graph.links)
     .enter().append("path")
     .attr("class", "link")
     .attr("d", path)
-    .style("fill", "none")
-    .style("stroke", "tan")
-    .style("stroke-opacity", ".33")
     .on("mouseover", function() {
-      d3.select(this).style("stroke-opacity", ".5")
-    })
-    .on("mouseout", function() {
-      d3.select(this).style("stroke-opacity", ".2")
-    })
-    .style("stroke-width", function(d) {
-      return Math.max(1, Math.sqrt(d.dy));
-    })
-    .sort(function(a, b) {
-      return b.dy - a.dy;
-    });
+        d3.select(this).style("stroke-opacity", ".5")
+      })
+      .on("mouseout", function() {
+        d3.select(this).style("stroke-opacity", ".2")
+      })
+      .style("stroke-width", function(d) {
+        return Math.max(1, Math.sqrt(d.dy));
+      })
+      .sort(function(a, b) {
+        return b.dy - a.dy;
+      });
+    //.stylizeLinkDynamic();
 
   // add the link titles
   link.append("title")
     .text(function(d) {
       return d.source.name + " → " + d.target.name + "\n" + format(d.value);
-    });
+    })
+    ;
 
   // add in the nodes
   var node = svg.append("g").selectAll(".node")
@@ -140,17 +140,17 @@ function draw() {
     })
     .append("rect")
     .attr("y", function(d) {
-      return d.dy / 2 - Math.sqrt(d.dy) / 2;
+      return d.dy / 2 - 10 - Math.sqrt(d.dy) / 2;
     })
-    .attr("height", function(d) {
-      return Math.sqrt(d.dy);
-    })
+    .attr("rx", 15)
+    .attr("ry", 15)
+    .attr("height", 40)
     .attr("width", sankey.nodeWidth())
     .style("fill", function(d) {
       return d.color = color(d.name.replace(/ .*/, ""));
     })
-    .style("fill-opacity", ".9")
     //.style("shape-rendering", "crispEdges")
+    .style("stroke-width", 4)
     .style("stroke", function(d) {
       return d3.rgb(d.color).darker(2);
     })
@@ -171,8 +171,8 @@ function draw() {
       return d.dy / 2;
     })
     .attr("dy", ".35em")
-    .attr("text-anchor", "end")
-    .attr("text-shadow", "0 1px 0 #fff")
+    //.attr("text-anchor", "end")
+    //.attr("text-shadow", "0 1px 0 #fff")
     .attr("transform", null)
     .text(function(d) {
       return d.name;
@@ -191,10 +191,16 @@ function draw() {
     
   // the function for moving the nodes
   function dragmove(d) {
+    console.log('height - d.dy');
+    console.log(height + ' - ' + d.dy)
+    console.log(height - d.dy, d3.event.y);
+    // console.log("translate(" + (
+    //     d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + "," + (
+    //     d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")")
     d3.select(this).attr("transform",
       "translate(" + (
         d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + "," + (
-        d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
+        d.y = Math.min(height - Math.sqrt(d.dy), d3.event.y)) + ")");
     sankey.relayout();
     link.attr("d", path);
   };
