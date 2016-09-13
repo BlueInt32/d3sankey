@@ -1,9 +1,19 @@
-var units = "Widgets";
+console.log('is this thing on?');
 
+import * as d3 from 'd3';
+import * as d3sankey from 'd3-sankey';
+import data from 'data';
+
+console.log(d3);
+console.log(d3sankey);
+///
+
+var units = "supply chains";
+var vm = {};
 var CONTAINER_WIDTH = 1200,
   CONTAINER_HEIGHT = 600,
-  BOX_HEIGHT = 40
-BOX_BORDER_RADIUS = BOX_HEIGHT / 2,
+  BOX_HEIGHT = 40,
+  BOX_BORDER_RADIUS = BOX_HEIGHT / 2,
   BOX_TEXT_MARGIN_LEFT = 10,
   BOX_SUBTEXT_MARGIN_LEFT = 13,
   NODE_WIDTH = 150,
@@ -48,7 +58,7 @@ function resetSankey() {
   // remove all svg, start clean
   svg.selectAll("svg *").remove();
   // Set the sankey diagram properties
-  sankey = d3sankey()
+  sankey = d3sankey.sankey()
     .nodeWidth(NODE_WIDTH)
     .nodePadding(NODE_PADDING)
     .size([width, height]);
@@ -103,11 +113,11 @@ function draw() {
         .projection(function(d) {
           return [d.y, d.x];
         });
-        return pathTemplate;
+      return pathTemplate;
     }
 
     function drawLinks() {
-      link = svg.append("g").selectAll(".link")
+      vm.link = svg.append("g").selectAll(".link")
         .data(graphData.links)
         .enter().append("path")
         .attr("class", "link")
@@ -115,7 +125,7 @@ function draw() {
         .style("stroke-width", function(d) {
           return Math.max(1, Math.sqrt(d.dy));
         });
-      link.append("title")
+      vm.link.append("title")
         .text(function(d) {
           return d.source.name + " → " + d.target.name + "\n" + format(d.value);
         });
@@ -123,7 +133,7 @@ function draw() {
   }
 
   function drawNodes() {
-    node = putNodesInPlace();
+    putNodesInPlace();
     drawDebugBoxes();
     drawProductBoxes();
     drawProductIcons();
@@ -131,7 +141,7 @@ function draw() {
     drawProductTexts();
 
     function putNodesInPlace() {
-      var node = svg.append("g").selectAll(".node")
+      vm.node = svg.append("g").selectAll(".node")
         .data(graphData.nodes)
         .enter().append("g")
         .attr("class", "node")
@@ -147,12 +157,12 @@ function draw() {
             this.parentNode.appendChild(this);
           })
           .on("drag", dragmove));
-          return node;
+
     }
 
     function drawDebugBoxes() {
       if (SHOW_DEBUG_BOX) {
-        node
+        vm.node
           .append("rect")
           .style("fill", "none")
           .style("stroke-width", 1)
@@ -165,7 +175,7 @@ function draw() {
     }
 
     function drawProductBoxes() {
-      node
+      vm.node
         .filter(function(d) {
           return (d.type !== "_expander");
         })
@@ -185,7 +195,7 @@ function draw() {
     }
 
     function drawProductIcons() {
-      node
+      vm.node
         .filter(function(d) {
           return (d.type !== "_expander");
         })
@@ -202,7 +212,7 @@ function draw() {
       //  ╔═╗─┐ ┬┌─┐┌─┐┌┐┌┌┬┐┌─┐┬─┐ 
       //  ║╣ ┌┴┬┘├─┘├─┤│││ ││├┤ ├┬┘
       //  ╚═╝┴ └─┴  ┴ ┴┘└┘─┴┘└─┘┴└─
-      node
+      vm.node
         .filter(function(d) {
           return (d.type === "_expander");
         })
@@ -223,7 +233,7 @@ function draw() {
       drawProductCompany();
 
       function drawProductName() {
-        node
+        vm.node
           .filter(function(d) {
             return d.type !== '_expander';
           })
@@ -240,7 +250,7 @@ function draw() {
       }
 
       function drawProductCompany() {
-        node
+        vm.node
           .filter(function(d) {
             return d.type !== '_expander';
           })
@@ -267,6 +277,6 @@ function draw() {
         d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + "," + (
         d.y = Math.min(height - Math.sqrt(d.dy), d3.event.y)) + ")");
     sankey.relayout();
-    link.attr("d", pathTemplate);
+    vm.link.attr("d", pathTemplate);
   };
 }
