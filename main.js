@@ -1,6 +1,6 @@
 console.log('is this thing on?');
 
-import * as d3 from 'd3';
+import d3 from 'd3';
 import * as d3sankey from 'd3-sankey';
 import data from 'data';
 
@@ -22,80 +22,95 @@ var CONTAINER_WIDTH = 1200,
   SHOW_DEBUG_BOX = false;
 
 var MARGINS = {
-    TOP: 0,
-    RIGHT: 0,
-    BOTTOM: 0,
-    LEFT: 0
+    TOP: 5,
+    RIGHT: 5,
+    BOTTOM: 5,
+    LEFT: 5
   },
   width = CONTAINER_WIDTH - MARGINS.LEFT - MARGINS.RIGHT,
   height = CONTAINER_HEIGHT - MARGINS.TOP - MARGINS.BOTTOM;
+
+vm.svg = {};
+vm.container = {};
+vm.sankey = {};
+vm.pathTemplate = {};
+vm.graphData = getData(0);
+vm.drag = d3.behavior.drag()
+  .origin(function(d) {
+    return d;
+  })
+  .on("dragstart", dragstarted)
+  .on("drag", dragging)
+  .on("dragend", dragended);
 
 var formatNumber = d3.format(",.0f"), // zero decimal places
   format = function(d) {
     return formatNumber(d) + " " + units;
   },
   color = d3.scale.category20();
+var zoom = d3.behavior.zoom()
+  .scaleExtent([.3, 10])
+  .on("zoom", zoomed);
 
-var svg = drawSvg();
-var sankey = {};
-var pathTemplate = {};
-var graphData = getData(0);
+createSvgContainer();
 resetSankey();
 draw();
 
-function drawSvg() {
+function createSvgContainer() {
   // append the svg canvas to the page
-  var svg = d3.select("#vis").append("svg")
+  vm.svg = d3.select("#vis").append("svg")
     .attr("width", width + MARGINS.LEFT + MARGINS.RIGHT)
     .attr("height", height + MARGINS.TOP + MARGINS.BOTTOM)
     .append("g")
     .attr("transform",
-      "translate(" + MARGINS.LEFT + "," + MARGINS.TOP + ")");
-  return svg;
+      "translate(" + MARGINS.LEFT + "," + MARGINS.TOP + ")")
+    .call(zoom);
+  var rect = vm.svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "none")
+    .style("pointer-events", "all");
+
+  vm.container = vm.svg.append("g");
 }
 
-function resetSankey() {
-  // remove all svg, start clean
-  svg.selectAll("svg *").remove();
-  // Set the sankey diagram properties
-  sankey = d3sankey.sankey()
-    .nodeWidth(NODE_WIDTH)
-    .nodePadding(NODE_PADDING)
-    .size([width, height]);
+function zoomed() {
+  vm.container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
+
 
 function addSankeyNode() {
   console.log('adding node');
   var nodeDef = {
-    "node": graphData.nodes.length,
-    "name": "node" + (graphData.nodes.length + 1)
+    "node": vm.graphData.nodes.length,
+    "name": "node" + (vm.graphData.nodes.length + 1)
   };
   var linkDef = {
     "source": nodeDef.node - 1,
     "target": nodeDef.node,
     "value": 10
   };
-  graphData.nodes.push(nodeDef);
-  graphData.links.push(linkDef);
+  vm.graphData.nodes.push(nodeDef);
+  vm.graphData.links.push(linkDef);
   resetSankey();
   draw();
 }
 
 function draw() {
 
-  sankey.nodes(graphData.nodes)
-    .links(graphData.links)
+  vm.sankey.nodes(vm.graphData.nodes)
+    .links(vm.graphData.links)
     .layout(1);
 
   drawConnections();
   drawNodes();
 
   function drawConnections() {
-    pathTemplate = buildPathTemplates();
+    buildPathTemplates();
     drawLinks();
 
     function buildPathTemplates() {
-      var pathTemplate = d3.svg.diagonal()
+      vm.pathTemplate = d3.svg.diagonal()
         .source(function(d) {
           var xOffset = d.source.type === '_expander' ? EXPANDER_RADIUS + NODE_WIDTH / 2 : NODE_WIDTH;
           return {
@@ -113,15 +128,14 @@ function draw() {
         .projection(function(d) {
           return [d.y, d.x];
         });
-      return pathTemplate;
     }
 
     function drawLinks() {
-      vm.link = svg.append("g").selectAll(".link")
-        .data(graphData.links)
+      vm.link = vm.container.append("g").selectAll(".link")
+        .data(vm.graphData.links)
         .enter().append("path")
         .attr("class", "link")
-        .attr("d", pathTemplate)
+        .attr("d", vm.pathTemplate)
         .style("stroke-width", function(d) {
           return Math.max(1, Math.sqrt(d.dy));
         });
@@ -141,23 +155,15 @@ function draw() {
     drawProductTexts();
 
     function putNodesInPlace() {
-      vm.node = svg.append("g").selectAll(".node")
-        .data(graphData.nodes)
+      vm.node = vm.container.append("g").selectAll(".node")
+        .data(vm.graphData.nodes)
         .enter().append("g")
         .attr("class", "node")
         .attr("transform", function(d) {
           console.log(d.name, d.x, d.y);
           return "translate(" + d.x + "," + d.y + ")";
         })
-        .call(d3.behavior.drag()
-          .origin(function(d) {
-            return d;
-          })
-          .on("dragstart", function() {
-            this.parentNode.appendChild(this);
-          })
-          .on("drag", dragmove));
-
+        .call(vm.drag);
     }
 
     function drawDebugBoxes() {
@@ -167,7 +173,7 @@ function draw() {
           .style("fill", "none")
           .style("stroke-width", 1)
           .style("stroke", "#F00")
-          .attr("width", sankey.nodeWidth())
+          .attr("width", NODE_WIDTH)
           .attr("height", function(d) {
             return d.dy;
           });
@@ -186,8 +192,7 @@ function draw() {
         .attr("height", BOX_HEIGHT)
         .attr("rx", BOX_BORDER_RADIUS)
         .attr("ry", BOX_BORDER_RADIUS)
-        .attr("width", sankey.nodeWidth())
-        //.style("stroke-width", 3)
+        .attr("width", NODE_WIDTH)
         .append("title")
         .text(function(d) {
           return d.name + "\n" + format(d.value);
@@ -209,15 +214,12 @@ function draw() {
     }
 
     function drawExpanderBoxes() {
-      //  ╔═╗─┐ ┬┌─┐┌─┐┌┐┌┌┬┐┌─┐┬─┐ 
-      //  ║╣ ┌┴┬┘├─┘├─┤│││ ││├┤ ├┬┘
-      //  ╚═╝┴ └─┴  ┴ ┴┘└┘─┴┘└─┘┴└─
       vm.node
         .filter(function(d) {
           return (d.type === "_expander");
         })
         .append("circle")
-        .attr("cx", sankey.nodeWidth() / 2)
+        .attr("cx", NODE_WIDTH / 2)
         .attr("cy", function(d) {
           return d.dy / 2;
         })
@@ -269,14 +271,34 @@ function draw() {
       }
     }
   }
+}
 
-  // the function for moving the nodes
-  function dragmove(d) {
-    d3.select(this).attr("transform",
-      "translate(" + (
-        d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + "," + (
-        d.y = Math.min(height - Math.sqrt(d.dy), d3.event.y)) + ")");
-    sankey.relayout();
-    vm.link.attr("d", pathTemplate);
-  };
+function resetSankey() {
+  // remove all svg, start clean
+  vm.container.selectAll("svg *").remove();
+  // Set the sankey diagram properties
+  vm.sankey = d3sankey.sankey()
+    .nodeWidth(NODE_WIDTH)
+    .nodePadding(NODE_PADDING)
+    .size([width, height]);
+}
+
+
+
+function dragstarted(d) {
+  d3.event.sourceEvent.stopPropagation();
+  d3.select(this).classed("dragging", true);
+}
+
+function dragging(d) {
+  //debugger;
+  //d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
+  d3.select(this).attr("transform",
+    "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")");
+  vm.sankey.relayout();
+  vm.link.attr("d", vm.pathTemplate);
+}
+
+function dragended(d) {
+  d3.select(this).classed("dragging", false);
 }

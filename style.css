@@ -33,11 +33,13 @@
   fill: #777;
   /*text-shadow: 0 1px 0 #fff;*/
 }
+
 .link {
   fill: none;
   stroke: #000;
-  stroke-opacity: .33;
+  stroke-opacity: .15;
 }
+
 .link:hover {
-  stroke-opacity: .5;
+  stroke-opacity: .33;
 }
