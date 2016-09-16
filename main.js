@@ -1,10 +1,9 @@
 console.log('is this thing on?');
 
 import d3 from 'd3';
-import * as d3sankey from 'd3-sankey';
+import d3sankey from './sankey';
 import data from 'data';
 
-console.log(d3);
 console.log(d3sankey);
 ///
 
@@ -277,7 +276,7 @@ function resetSankey() {
   // remove all svg, start clean
   vm.container.selectAll("svg *").remove();
   // Set the sankey diagram properties
-  vm.sankey = d3sankey.sankey()
+  vm.sankey = d3sankey()
     .nodeWidth(NODE_WIDTH)
     .nodePadding(NODE_PADDING)
     .size([width, height]);
