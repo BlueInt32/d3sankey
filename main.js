@@ -82,7 +82,7 @@ function addSankeyNode() {
   console.log('adding node');
   var nodeDef = {
     "node": vm.graphData.nodes.length,
-    "name": "node" + (vm.graphData.nodes.length + 1)
+    "title": "node" + (vm.graphData.nodes.length + 1)
   };
   var linkDef = {
     "source": nodeDef.node - 1,
@@ -140,7 +140,7 @@ function draw() {
         });
       vm.link.append("title")
         .text(function(d) {
-          return d.source.name + " → " + d.target.name + "\n" + format(d.value);
+          return d.source.title + " → " + d.target.title + "\n" + format(d.value);
         });
     }
   }
@@ -159,10 +159,11 @@ function draw() {
         .enter().append("g")
         .attr("class", "node")
         .attr("transform", function(d) {
-          console.log(d.name, d.x, d.y);
+          console.log(d.title, d.x, d.y);
           return "translate(" + d.x + "," + d.y + ")";
         })
         .call(vm.drag);
+
     }
 
     function drawDebugBoxes() {
@@ -192,10 +193,17 @@ function draw() {
         .attr("rx", BOX_BORDER_RADIUS)
         .attr("ry", BOX_BORDER_RADIUS)
         .attr("width", NODE_WIDTH)
-        .append("title")
-        .text(function(d) {
-          return d.name + "\n" + format(d.value);
-        });
+        .append('clipPath')
+        .attr('id', function(d) {
+          return 'c_' + d.node;
+        })
+        .append('rect')
+        .attr('x', BOX_TEXT_MARGIN_LEFT)
+        .attr('y', function(d) {
+          return d.dy / 2;
+        })
+        .attr('width', NODE_WIDTH)
+        .attr('height', 20);
     }
 
     function drawProductIcons() {
@@ -225,7 +233,7 @@ function draw() {
         .attr("r", EXPANDER_RADIUS)
         .append("title")
         .text(function(d) {
-          return d.name + "\n" + format(d.value);
+          return d.title + "\n" + format(d.value);
         });
     }
 
@@ -234,20 +242,29 @@ function draw() {
       drawProductCompany();
 
       function drawProductName() {
-        vm.node
+        var textContainer = vm.node
           .filter(function(d) {
             return d.type !== '_expander';
           })
-          .append("text")
+          .append('g')
+          .attr('clip-path', function(d) {
+            return 'url(#c_' + d.node + ')'
+          });
+
+        textContainer.append("text")
           .attr('class', 'title')
+          .style('width', NODE_WIDTH + 'px')
+          .attr('width', NODE_WIDTH)
           .attr("y", function(d) {
             return d.dy / 2;
           })
           .attr("x", BOX_TEXT_MARGIN_LEFT)
           .text(function(d) {
-            return d.name;
+            return d.title;
           })
           .attr("text-anchor", "start");
+
+
       }
 
       function drawProductCompany() {
@@ -256,7 +273,7 @@ function draw() {
             return d.type !== '_expander';
           })
           .append("text")
-          .attr('class', 'owner')
+          .attr('class', 'subtitle')
           .attr("y", function(d) {
             return d.dy / 2;
           })
@@ -264,7 +281,7 @@ function draw() {
           .attr("dx", ".2em")
           .attr("x", BOX_SUBTEXT_MARGIN_LEFT)
           .text(function(d) {
-            return d.owner;
+            return d.subtitle;
           })
           .attr("text-anchor", "start");
       }

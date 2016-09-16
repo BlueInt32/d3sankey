@@ -20,18 +20,19 @@
 
 .node text.title {
   font-family: Calibri;
+  font-size: .8em;
   font-weight: bold;
   pointer-events: none;
   fill: #777;
-  /*text-shadow: 0 1px 0 #fff;*/
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.node text.owner {
+.node text.subtitle {
   font-family: Calibri;
-  font-size: .8em;
+  font-size: .6em;
   pointer-events: none;
   fill: #777;
-  /*text-shadow: 0 1px 0 #fff;*/
 }
 
 .link {
