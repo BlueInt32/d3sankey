@@ -16,6 +16,7 @@ var CONTAINER_WIDTH = 1200,
   BOX_TEXT_MARGIN_LEFT = 10,
   BOX_SUBTEXT_MARGIN_LEFT = 13,
   NODE_WIDTH = 150,
+  NODE_TITLE_WIDTH = 100,
   NODE_PADDING = 0,
   EXPANDER_RADIUS = 20,
   SHOW_DEBUG_BOX = false;
@@ -111,14 +112,14 @@ function draw() {
     function buildPathTemplates() {
       vm.pathTemplate = d3.svg.diagonal()
         .source(function(d) {
-          var xOffset = d.source.type === '_expander' ? EXPANDER_RADIUS + NODE_WIDTH / 2 : NODE_WIDTH;
+          var xOffset = d.source.type === 'small' ? EXPANDER_RADIUS + NODE_WIDTH / 2 : NODE_WIDTH;
           return {
             "x": d.source.y + d.source.dy / 2,
             "y": d.source.x + xOffset - 3
           };
         })
         .target(function(d) {
-          var xOffset = d.target.type === '_expander' ? NODE_WIDTH / 2 - EXPANDER_RADIUS : 0;
+          var xOffset = d.target.type === 'small' ? NODE_WIDTH / 2 - EXPANDER_RADIUS : 0;
           return {
             "x": d.target.y + d.target.dy / 2,
             "y": d.target.x + xOffset + 3
@@ -148,10 +149,10 @@ function draw() {
   function drawNodes() {
     putNodesInPlace();
     drawDebugBoxes();
-    drawProductBoxes();
+    drawNormalBoxes();
     drawProductIcons();
-    drawExpanderBoxes();
-    drawProductTexts();
+    drawSmallBoxes();
+    writeTexts();
 
     function putNodesInPlace() {
       vm.node = vm.container.append("g").selectAll(".node")
@@ -180,10 +181,10 @@ function draw() {
       }
     }
 
-    function drawProductBoxes() {
+    function drawNormalBoxes() {
       vm.node
         .filter(function(d) {
-          return (d.type !== "_expander");
+          return (d.type === "normal" || d.type === 'root');
         })
         .append("rect")
         .attr("y", function(d) {
@@ -193,23 +194,16 @@ function draw() {
         .attr("rx", BOX_BORDER_RADIUS)
         .attr("ry", BOX_BORDER_RADIUS)
         .attr("width", NODE_WIDTH)
-        .append('clipPath')
-        .attr('id', function(d) {
-          return 'c_' + d.node;
-        })
-        .append('rect')
-        .attr('x', BOX_TEXT_MARGIN_LEFT)
-        .attr('y', function(d) {
-          return d.dy / 2;
-        })
-        .attr('width', NODE_WIDTH)
-        .attr('height', 20);
+        .append("title")
+        .text(function(d) {
+          return d.title;
+        });
     }
 
     function drawProductIcons() {
       vm.node
         .filter(function(d) {
-          return (d.type !== "_expander");
+          return (d.flag === "warning");
         })
         .append("svg:image")
         .attr("xlink:href", 'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/32/519791-101_Warning-128.png')
@@ -218,12 +212,25 @@ function draw() {
         })
         .attr("height", 32)
         .attr("width", 32);
-    }
 
-    function drawExpanderBoxes() {
       vm.node
         .filter(function(d) {
-          return (d.type === "_expander");
+          return (d.flag === "ok");
+        })
+        .append("svg:image")
+        .attr("xlink:href", 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678134-sign-check-128.png')
+        .attr("transform", function(d) {
+          return "translate(" + (NODE_WIDTH - 32 - 3) + "," + (d.dy / 2 - BOX_HEIGHT / 2 + 3) + ")";
+        })
+        .attr("height", 32)
+        .attr("width", 32);
+
+    }
+
+    function drawSmallBoxes() {
+      vm.node
+        .filter(function(d) {
+          return (d.type === "small");
         })
         .append("circle")
         .attr("cx", NODE_WIDTH / 2)
@@ -237,24 +244,17 @@ function draw() {
         });
     }
 
-    function drawProductTexts() {
-      drawProductName();
-      drawProductCompany();
+    function writeTexts() {
+      writeTitles();
+      writeSubtitles();
 
-      function drawProductName() {
-        var textContainer = vm.node
+      function writeTitles() {
+        vm.node
           .filter(function(d) {
-            return d.type !== '_expander';
+            return d.type === 'normal' || d.type === 'root'
           })
-          .append('g')
-          .attr('clip-path', function(d) {
-            return 'url(#c_' + d.node + ')'
-          });
-
-        textContainer.append("text")
+          .append("text")
           .attr('class', 'title')
-          .style('width', NODE_WIDTH + 'px')
-          .attr('width', NODE_WIDTH)
           .attr("y", function(d) {
             return d.dy / 2;
           })
@@ -262,15 +262,29 @@ function draw() {
           .text(function(d) {
             return d.title;
           })
-          .attr("text-anchor", "start");
+          .attr("text-anchor", "start")
+          .each(wrap);
 
+        vm.node
+          .filter(function(d) {
+            return d.type === 'small'
+          })
+          .append("text")
+          .attr('class', 'big')
+          .attr("y", function(d) {
+            return d.dy / 2;
+          })
+          .attr("x", NODE_WIDTH / 2)
+          .text(function(d) {
+            return d.title;
+          });
 
       }
 
-      function drawProductCompany() {
+      function writeSubtitles() {
         vm.node
           .filter(function(d) {
-            return d.type !== '_expander';
+            return d.type === 'normal' || d.type === 'root';
           })
           .append("text")
           .attr('class', 'subtitle')
@@ -317,4 +331,15 @@ function dragging(d) {
 
 function dragended(d) {
   d3.select(this).classed("dragging", false);
+}
+
+function wrap() {
+  var self = d3.select(this),
+    textLength = self.node().getComputedTextLength(),
+    text = self.text();
+  while (textLength > (NODE_TITLE_WIDTH) && text.length > 0) {
+    text = text.slice(0, -1);
+    self.text(text + '...');
+    textLength = self.node().getComputedTextLength();
+  }
 }

@@ -3,62 +3,71 @@ function getData(datasetIndex) {
   var datasets = [{
     'nodes': [{
       'node': 0,
+      'type': 'root',
       'title': 'Nutt Butter Chocolate',
       'subtitle': 'Earth Nuts Inc.',
-      'status': 'known',
-      'root': 'true',
       'xpos': 0
     }, {
       'node': 1,
+      'type': 'normal',
       'title': 'Cocoa Butter',
-      'status': 'known',
       'xpos': 1
     }, {
       'node': 2,
+      'type': 'normal',
       'title': 'Crazy Nuts Inc.',
-      'status': 'known',
-      'xpos': 2
+      'xpos': 2,
+      'flag': 'warning'
     }, {
       'node': 3,
+      'type': 'normal',
       'title': 'World Nuts Inc.',
-      'status': 'known',
-      'xpos': 2
+      'xpos': 2,
+      'flag': 'warning'
     }, {
       'node': 4,
+      'type': 'normal',
       'title': 'Dry Roasted Hazelnuts',
       'subtitle': 'All Nuts Inc.',
-      'status': 'known',
-      'xpos': 1
+      'xpos': 1,
+      'flag': 'warning'
     }, {
       'node': 5,
+      'type': 'small',
       'title': '?',
-      'status': 'unknown',
       'xpos': 2
     }, {
       'node': 6,
+      'type': 'normal',
       'title': 'Hazelnuts',
       'subtitle': "Cooperative - Paula's Nut Farm",
       'status': 'known',
       'xpos': 2
     }, {
       'node': 7,
+      'type': 'normal',
       'title': 'Evaporated sugar cane juice',
       'subtitle': 'Crazy Nuts Inc.',
-      'xpos': 1
+      'xpos': 1,
+      'flag': 'ok'
     }, {
       'node': 8,
+      'type': 'normal',
       'title': 'Sugar Cane',
       'xpos': 2
     }, {
       'node': 9,
+      'type': 'normal',
       'title': 'Cooperative - Bianchi Sugar Farm',
       'xpos': 3
     }, {
       'node': 10,
+      'type': 'normal',
       'title': 'Cooperative - Romano Sugar Farm',
       'xpos': 3
     }, {
       'node': 11,
+      'type': 'normal',
       'title': 'Cooperative - Yamamoto Sugar Farm',
       'xpos': 3
     }],

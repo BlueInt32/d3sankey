@@ -24,8 +24,14 @@
   font-weight: bold;
   pointer-events: none;
   fill: #777;
-  text-overflow: ellipsis;
-  overflow: hidden;
+}
+
+.node text.big {
+  font-family: Calibri;
+  font-size: 1.1;
+  font-weight: bold;
+  pointer-events: none;
+  fill: #777;
 }
 
 .node text.subtitle {
