@@ -65,47 +65,47 @@ function getData(datasetIndex) {
     'links': [{
       'source': 0,
       'target': 1,
-      'value': 5
+      'value': 1
     }, {
       'source': 0,
       'target': 4,
-      'value': 5
+      'value': 1
     }, {
       'source': 0,
       'target': 7,
-      'value': 5
+      'value': 1
     }, {
       'source': 1,
       'target': 2,
-      'value': 5
+      'value': 1
     }, {
       'source': 1,
       'target': 3,
-      'value': 5
+      'value': 1
     }, {
       'source': 4,
       'target': 5,
-      'value': 5
+      'value': 1
     }, {
       'source': 4,
       'target': 6,
-      'value': 5
+      'value': 1
     }, {
       'source': 7,
       'target': 8,
-      'value': 5
+      'value': 3
     }, {
       'source': 8,
       'target': 9,
-      'value': 5
+      'value': .2
     }, {
       'source': 8,
       'target': 10,
-      'value': 5
+      'value': .2
     }, {
       'source': 8,
       'target': 11,
-      'value': 5
+      'value': .2
     }]
   }, {
     'nodes': [{
@@ -118,7 +118,7 @@ function getData(datasetIndex) {
     'links': [{
       'source': 0,
       'target': 1,
-      'value': 5
+      'value': 2
     }]
   }];
   return datasets[datasetIndex];
