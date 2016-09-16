@@ -1,39 +1,125 @@
-
 function getData(datasetIndex) {
 
-    var datasets = [{
-      'nodes':[
-        {'node':0,'name':'Butter Chocolate', 'type':'product', 'owner': 'Earth Nuts Inc.'},
-        {'node':1,'name':'Cocoa Butter', 'type': 'product', 'owner': 'Crazy Nuts Inc.'},
-        {'node':2,'name':'node1', 'type': '_expander'},
-        {'node':3,'name':'node3'},
-        {'node':4,'name':'node4'},
-        {'node':5,'name':'node5'},
-        {'node':6,'name':'node6'},
-        {'node':7,'name':'node7'}
-      ],
-      'links':[
-        {'source':0,'target':2,'value':25},
-        {'source':1,'target':2,'value':5},
-        {'source':1,'target':3,'value':20},
-        {'source':2,'target':4,'value':29},
-        {'source':2,'target':5,'value':1},
-        {'source':3,'target':4,'value':10},
-        {'source':3,'target':5,'value':2},
-        {'source':3,'target':6,'value':8},
-        {'source':4,'target':7,'value':39},
-        {'source':5,'target':7,'value':3},
-        {'source':6,'target':7,'value':8}
-      ]
-    },
-    {
-      'nodes':[
-        {'node':0,'name':'node0'},
-        {'node':1,'name':'node1'},
-      ],
-      'links':[
-        {'source':0,'target':1,'value':25}
-      ]
-    }];
-    return datasets[datasetIndex];
+  var datasets = [{
+    'nodes': [{
+      'node': 0,
+      'title': 'Nutt Butter Chocolate',
+      'subtitle': 'Earth Nuts Inc.',
+      'status': 'known',
+      'root': 'true',
+      'xpos': 0
+    }, {
+      'node': 1,
+      'title': 'Cocoa Butter',
+      'status': 'known',
+      'xpos': 1
+    }, {
+      'node': 2,
+      'title': 'Crazy Nuts Inc.',
+      'status': 'known',
+      'xpos': 2
+    }, {
+      'node': 3,
+      'title': 'World Nuts Inc.',
+      'status': 'known',
+      'xpos': 2
+    }, {
+      'node': 4,
+      'title': 'Dry Roasted Hazelnuts',
+      'subtitle': 'All Nuts Inc.',
+      'status': 'known',
+      'xpos': 1
+    }, {
+      'node': 5,
+      'title': '?',
+      'status': 'unknown',
+      'xpos': 2
+    }, {
+      'node': 6,
+      'title': 'Hazelnuts',
+      'subtitle': "Cooperative - Paula's Nut Farm",
+      'status': 'known',
+      'xpos': 2
+    }, {
+      'node': 7,
+      'title': 'Evaporated sugar cane juice',
+      'subtitle': 'Crazy Nuts Inc.',
+      'xpos': 1
+    }, {
+      'node': 8,
+      'title': 'Sugar Cane',
+      'xpos': 2
+    }, {
+      'node': 9,
+      'title': 'Cooperative - Bianchi Sugar Farm',
+      'xpos': 3
+    }, {
+      'node': 10,
+      'title': 'Cooperative - Romano Sugar Farm',
+      'xpos': 3
+    }, {
+      'node': 11,
+      'title': 'Cooperative - Yamamoto Sugar Farm',
+      'xpos': 3
+    }],
+    'links': [{
+      'source': 0,
+      'target': 1,
+      'value': 5
+    }, {
+      'source': 0,
+      'target': 4,
+      'value': 5
+    }, {
+      'source': 0,
+      'target': 7,
+      'value': 5
+    }, {
+      'source': 1,
+      'target': 2,
+      'value': 5
+    }, {
+      'source': 1,
+      'target': 3,
+      'value': 5
+    }, {
+      'source': 4,
+      'target': 5,
+      'value': 5
+    }, {
+      'source': 4,
+      'target': 6,
+      'value': 5
+    }, {
+      'source': 7,
+      'target': 8,
+      'value': 5
+    }, {
+      'source': 8,
+      'target': 9,
+      'value': 5
+    }, {
+      'source': 8,
+      'target': 10,
+      'value': 5
+    }, {
+      'source': 8,
+      'target': 11,
+      'value': 5
+    }]
+  }, {
+    'nodes': [{
+      'node': 0,
+      'title': 'node0'
+    }, {
+      'node': 1,
+      'title': 'node1'
+    }, ],
+    'links': [{
+      'source': 0,
+      'target': 1,
+      'value': 5
+    }]
+  }];
+  return datasets[datasetIndex];
 }
