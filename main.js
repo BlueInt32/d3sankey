@@ -16,7 +16,7 @@ var CONTAINER_WIDTH = 1200,
   BOX_TEXT_MARGIN_LEFT = 10,
   BOX_SUBTEXT_MARGIN_LEFT = 13,
   NODE_WIDTH = 150,
-  NODE_TITLE_WIDTH = 100,
+  NODE_TITLE_WIDTH = 110,
   NODE_PADDING = 0,
   EXPANDER_RADIUS = 20,
   SHOW_DEBUG_BOX = false;
@@ -272,9 +272,9 @@ function draw() {
           .append("text")
           .attr('class', 'big')
           .attr("y", function(d) {
-            return d.dy / 2;
+            return d.dy / 2 + 5;
           })
-          .attr("x", NODE_WIDTH / 2)
+          .attr("x", NODE_WIDTH / 2 - 4)
           .text(function(d) {
             return d.title;
           });

@@ -11,7 +11,7 @@
 }
 
 .node circle {
-  fill: #FFF;
+  fill: #999;
   cursor: move;
   fill-opacity: 1;
   stroke: #BBB;
@@ -28,10 +28,10 @@
 
 .node text.big {
   font-family: Calibri;
-  font-size: 1.1;
+  font-size: 1.1em;
   font-weight: bold;
   pointer-events: none;
-  fill: #777;
+  fill: #FFF;
 }
 
 .node text.subtitle {
